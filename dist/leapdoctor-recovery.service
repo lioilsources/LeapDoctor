@@ -1,0 +1,15 @@
+[Unit]
+Description=LeapDoctor - Post-boot snapshot recovery
+After=graphical-session.target NetworkManager.service
+Wants=gdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/leapdoctor --post-boot-check
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=leapdoctor-recovery
+
+[Install]
+WantedBy=multi-user.target

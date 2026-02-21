@@ -1,0 +1,66 @@
+# ══════════════════════════════════════════════════════════════
+# ~/.mcphost.yml  –  konfigurace pro mcphost (SUSE Leap 16)
+# ══════════════════════════════════════════════════════════════
+#
+# Použití:
+#   mcphost                         # interaktivní chat
+#   mcphost -p "nainstaluj gimp"    # jednorázový prompt
+#
+# Instalace suse-agent-guard:
+#   cd suse-agent-guard && make service-install
+
+provider: anthropic
+model: claude-sonnet-4-6
+
+# Systémový prompt – ClaudeCode ho čte jako kontext
+systemPrompt: |
+  Jsi asistent pro správu openSUSE Leap 16 s GNOME/Wayland.
+  
+  Striktní pravidla:
+  - ✅ Flatpak pro desktop aplikace (suse_flatpak_install)
+  - ✅ zypper pro systémové balíčky (suse_zypper_install)
+  - ✅ gsettings/dconf pro GNOME konfiguraci
+  - ❌ NIKDY nenavrhuj snap, AppImage, yast2
+  - ❌ NIKDY nenavrhuj AppArmor (Leap 16 = SELinux)
+  - ❌ NIKDY nenavrhuj X11/Xorg řešení (běžíme Wayland)
+  - ❌ NIKDY nenavrhuj KDE/Plasma nástroje
+  
+  Workflow pro destruktivní operace:
+  1. suse_system_health – zkontroluj stav před změnou
+  2. Proveď změnu (suse_zypper_install atd.) – snapshot je automatický
+  3. suse_system_health – ověř stav po změně
+
+mcpServers:
+  # Hlavní SUSE guard server
+  suse-guard:
+    command: /usr/local/bin/suse-agent-guard
+
+  # Filesystem přístup (read pro logy a konfigurace)
+  filesystem:
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/home/olin"
+      - "/etc"
+      - "/var/log"
+      - "/usr/share"
+
+---
+# ══════════════════════════════════════════════════════════════
+# ~/.claude.json  –  konfigurace pro ClaudeCode
+# (přidej do existující struktury mcpServers sekce)
+# ══════════════════════════════════════════════════════════════
+#
+# Nebo přes CLI:
+#   claude mcp add suse-guard -- /usr/local/bin/suse-agent-guard
+
+# Obsah souboru ~/.claude.json:
+# {
+#   "mcpServers": {
+#     "suse-guard": {
+#       "command": "/usr/local/bin/suse-agent-guard",
+#       "type": "stdio"
+#     }
+#   }
+# }

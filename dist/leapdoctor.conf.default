@@ -1,0 +1,16 @@
+{
+  "dry_run": false,
+  "rate_limit": {
+    "max_destructive_per_30min": 10,
+    "max_rollbacks_before_lockout": 3
+  },
+  "safety": {
+    "block_gnome_critical": true,
+    "critical_packages": ["gnome-shell", "gdm", "mutter", "glib2", "gtk3", "gtk4", "wayland", "pipewire"]
+  },
+  "recovery": {
+    "enabled": true,
+    "gdm_wait_timeout": "60s",
+    "auto_reboot_on_rollback": false
+  }
+}

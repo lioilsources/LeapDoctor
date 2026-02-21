@@ -1,0 +1,20 @@
+[Unit]
+Description=SUSE Agent Guard – Post-boot snapshot recovery
+Documentation=https://github.com/your/suse-agent-guard
+# Spustí se po GDM a síti – abychom mohli ověřit zdraví GNOME
+After=gdm.service NetworkManager.service display-manager.service
+Wants=gdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/suse-agent-guard --post-boot-check
+# Má přístup k D-Bus pro notify-send
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+RemainAfterExit=yes
+# Logy jdou do journalu
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=suse-agent-guard-recovery
+
+[Install]
+WantedBy=multi-user.target
