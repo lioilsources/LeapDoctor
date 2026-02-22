@@ -100,8 +100,12 @@ func MergeMcphostConfig(binaryPath string) error {
 	path := filepath.Join(os.Getenv("HOME"), ".mcphost.yml")
 	existing, _ := os.ReadFile(path)
 
-	if strings.Contains(string(existing), "leapdoctor") {
-		return fmt.Errorf("leapdoctor already configured in %s", path)
+	// Check specifically for leapdoctor as a YAML key (indented under mcpServers)
+	for _, line := range strings.Split(string(existing), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "leapdoctor:" || strings.HasPrefix(trimmed, "leapdoctor:") {
+			return fmt.Errorf("leapdoctor already configured in %s", path)
+		}
 	}
 
 	snippet := fmt.Sprintf("\n  leapdoctor:\n    command: %s\n", binaryPath)
@@ -122,10 +126,6 @@ func MergeClaudeConfig(binaryPath string) error {
 	path := filepath.Join(os.Getenv("HOME"), ".claude.json")
 	existing, _ := os.ReadFile(path)
 
-	if strings.Contains(string(existing), "leapdoctor") {
-		return fmt.Errorf("leapdoctor already configured in %s", path)
-	}
-
 	if len(existing) == 0 {
 		return os.WriteFile(path, []byte(ClaudeCodeSnippet(binaryPath)), 0644)
 	}
@@ -139,6 +139,9 @@ func MergeClaudeConfig(binaryPath string) error {
 	servers, _ := obj["mcpServers"].(map[string]interface{})
 	if servers == nil {
 		servers = make(map[string]interface{})
+	}
+	if _, exists := servers["leapdoctor"]; exists {
+		return fmt.Errorf("leapdoctor already configured in %s", path)
 	}
 	servers["leapdoctor"] = map[string]interface{}{
 		"command": binaryPath,
